@@ -66,24 +66,3 @@ middleman:
         bundlefile   => 'ca-bundle.crt',
         embed_bundle => false,
     }
-
-Please refer to the class documentation for details:
-
-* [Class: sslcert](manifests/init.pp)
-* [Define: sslcert::set](manifests/set.pp)
-
-# Dependencies
-
-See [metadata.json](metadata.json).
-
-# Operating system support
-
-This module has been tested on
-
-* Fedora 23
-* Ubuntu 14.04
-
-Any *NIX-style operating system should work out of the box or with small
-modifications.
-
-For details see [params.pp](manifests/params.pp).
