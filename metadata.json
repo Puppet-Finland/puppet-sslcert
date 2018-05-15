@@ -1,6 +1,6 @@
 {
   "name": "puppetfinland-sslcert",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Puppet-Finland team",
   "summary": "Install SSL certificates",
   "license": "BSD-2-Clause",
