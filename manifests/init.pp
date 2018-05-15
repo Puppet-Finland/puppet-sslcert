@@ -22,13 +22,11 @@
 #
 class sslcert
 (
-    $manage = true,
-    $sets = {}
+    Boolean $manage = true,
+    Hash    $sets = {}
 
 ) inherits sslcert::params
 {
-
-validate_bool($manage)
 
 if $manage {
     create_resources('sslcert::set', $sets)

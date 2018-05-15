@@ -24,22 +24,14 @@
 #
 define sslcert::set
 (
-    $ensure = 'present',
-    $bundlefile = undef,
-    $embed_bundle = false
+    Enum['present','absent'] $ensure = 'present',
+    Optional[String]         $bundlefile = undef,
+    Bollean                  $embed_bundle = false
 )
 {
     include ::sslcert::params
 
     $basename = $title
-    validate_string($basename)
-
-    if $bundlefile {
-        validate_string($bundlefile)
-    }
-    validate_bool($embed_bundle)
-    validate_re("${ensure}", [ '^present$', '^absent$' ])
-
     $keyfile = "${basename}.key"
     $certfile = "${basename}.crt"
 
