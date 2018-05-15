@@ -26,7 +26,7 @@ define sslcert::set
 (
     Enum['present','absent'] $ensure = 'present',
     Optional[String]         $bundlefile = undef,
-    Bollean                  $embed_bundle = false
+    Boolean                  $embed_bundle = false
 )
 {
     include ::sslcert::params
