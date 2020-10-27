@@ -37,14 +37,14 @@ define sslcert::set
 
     File {
         ensure => $ensure,
-        owner  => $::os::params::adminuser,
-        group  => $::os::params::admingroup,
+        owner  => 'root',
+        group  => $::sslcert::params::group,
     }
 
     Concat {
         ensure => $ensure,
-        owner  => $::os::params::adminuser,
-        group  => $::os::params::admingroup,
+        owner  => 'root',
+        group  => $::sslcert::params::group,
     }
 
     # The key will always be installed as-is

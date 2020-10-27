@@ -5,17 +5,17 @@
 #
 class sslcert::params {
 
-    include ::os::params
-
-    case $::osfamily {
+    case $facts['os']['family'] {
         'RedHat': {
             $pki_dir = '/etc/pki/tls'
+            $group = 'root'
         }
         'Debian': {
             $pki_dir = '/etc/ssl'
+            $group = 'ssl-cert'
         }
         default: {
-            fail("Unsupported OS: ${::osfamily}")
+            fail("Unsupported OS: ${facts['os']['family']}")
         }
     }
 

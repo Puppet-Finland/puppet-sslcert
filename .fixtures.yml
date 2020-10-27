@@ -4,9 +4,6 @@ fixtures:
     concat:
       repo: "puppetlabs/concat"
       ref: "6.2.0"
-    os:
-      repo: "puppetfinland/os"
-      ref: "1.1.3"
     stdlib:
       repo: "puppetlabs/stdlib"
       ref: "6.5.0"
