@@ -8,11 +8,19 @@ class sslcert::params {
     case $facts['os']['family'] {
         'RedHat': {
             $pki_dir = '/etc/pki/tls'
-            $group = 'root'
+            $owner = 'root'
+            $cert_group = 'root'
+            $cert_mode = '0644'
+            $private_key_group = 'root'
+            $private_key_mode = '0600'
         }
         'Debian': {
             $pki_dir = '/etc/ssl'
-            $group = 'ssl-cert'
+            $owner = 'root'
+            $cert_group = 'root'
+            $cert_mode = '0644'
+            $private_key_group = 'ssl-cert'
+            $private_key_mode = '0640'
         }
         default: {
             fail("Unsupported OS: ${facts['os']['family']}")

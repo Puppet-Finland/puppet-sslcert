@@ -35,23 +35,14 @@ define sslcert::set
     $keyfile = "${basename}.key"
     $certfile = "${basename}.crt"
 
-    File {
-        ensure => $ensure,
-        owner  => 'root',
-        group  => $::sslcert::params::group,
-    }
-
-    Concat {
-        ensure => $ensure,
-        owner  => 'root',
-        group  => $::sslcert::params::group,
-    }
-
     # The key will always be installed as-is
     file { "sslcert-${keyfile}":
+        ensure => $ensure,
         name   => "${::sslcert::params::keydir}/${keyfile}",
         source => "puppet:///files/sslcert-${keyfile}",
-        mode   => '0600',
+        owner  => $::sslcert::params::owner,
+        group  => $::sslcert::params::private_key_group,
+        mode   => $::sslcert::params::private_key_mode,
     }
 
     # We might not need a CA bundle if the existing ones are enough, or if we're 
@@ -64,7 +55,11 @@ define sslcert::set
             $target = "sslcert-${basename}-cert-and-bundle"
 
             concat { $target:
-                path  => "${::sslcert::params::certdir}/${certfile}",
+                ensure => $ensure,
+                path   => "${::sslcert::params::certdir}/${certfile}",
+                owner  => $::sslcert::params::owner,
+                group  => $::sslcert::params::cert_group,
+                mode   => $::sslcert::params::cert_mode,
             }
             concat::fragment { "sslcert-${basename}-cert":
                 source => "puppet:///files/sslcert-${certfile}",
@@ -79,14 +74,21 @@ define sslcert::set
             }
         } else {
             file { "sslcert-${bundlefile}":
+                ensure => $ensure,
                 name   => "${::sslcert::params::certdir}/${bundlefile}",
                 source => "puppet:///files/${bundlefile}",
-                mode   => '0644',
+                owner  => $::sslcert::params::owner,
+                group  => $::sslcert::params::cert_group,
+                mode   => $::sslcert::params::cert_mode,
+
             }
             file { "sslcert-${certfile}":
+                ensure => $ensure,
                 name   => "${::sslcert::params::certdir}/${certfile}",
                 source => "puppet:///files/sslcert-${certfile}",
-                mode   => '0644',
+                owner  => $::sslcert::params::owner,
+                group  => $::sslcert::params::cert_group,
+                mode   => $::sslcert::params::cert_mode,
             }
         }
     }
