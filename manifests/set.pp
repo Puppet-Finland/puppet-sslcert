@@ -39,7 +39,8 @@ define sslcert::set
     file { "sslcert-${keyfile}":
         ensure => $ensure,
         name   => "${::sslcert::params::keydir}/${keyfile}",
-        source => "puppet:///files/sslcert-${keyfile}",
+        source => "puppet:///files/sslcert-${keyfile}", # lint:ignore:puppet_url_without_modules
+
         owner  => $::sslcert::params::owner,
         group  => $::sslcert::params::private_key_group,
         mode   => $::sslcert::params::private_key_mode,
@@ -62,13 +63,15 @@ define sslcert::set
                 mode   => $::sslcert::params::cert_mode,
             }
             concat::fragment { "sslcert-${basename}-cert":
-                source => "puppet:///files/sslcert-${certfile}",
+                source => "puppet:///files/sslcert-${certfile}", # lint:ignore:puppet_url_without_modules
+
                 # The certificate must be placed at the head
                 order  => '1',
                 target => $target,
             }
             concat::fragment { "sslcert-${basename}-bundle":
-                source => "puppet:///files/${bundlefile}",
+                source => "puppet:///files/${bundlefile}", # lint:ignore:puppet_url_without_modules
+
                 order  => '2',
                 target => $target,
             }
@@ -76,7 +79,8 @@ define sslcert::set
             file { "sslcert-${bundlefile}":
                 ensure => $ensure,
                 name   => "${::sslcert::params::certdir}/${bundlefile}",
-                source => "puppet:///files/${bundlefile}",
+                source => "puppet:///files/${bundlefile}", # lint:ignore:puppet_url_without_modules
+
                 owner  => $::sslcert::params::owner,
                 group  => $::sslcert::params::cert_group,
                 mode   => $::sslcert::params::cert_mode,
@@ -85,7 +89,8 @@ define sslcert::set
             file { "sslcert-${certfile}":
                 ensure => $ensure,
                 name   => "${::sslcert::params::certdir}/${certfile}",
-                source => "puppet:///files/sslcert-${certfile}",
+                source => "puppet:///files/sslcert-${certfile}", # lint:ignore:puppet_url_without_modules
+
                 owner  => $::sslcert::params::owner,
                 group  => $::sslcert::params::cert_group,
                 mode   => $::sslcert::params::cert_mode,
