@@ -91,5 +91,14 @@ define sslcert::set
                 mode   => $::sslcert::params::cert_mode,
             }
         }
+    } else {
+        file { "sslcert-${certfile}":
+            ensure => $ensure,
+            name   => "${::sslcert::params::certdir}/${certfile}",
+            source => "puppet:///files/sslcert-${certfile}", # lint:ignore:puppet_url_without_modules
+            owner  => $::sslcert::params::owner,
+            group  => $::sslcert::params::cert_group,
+            mode   => $::sslcert::params::cert_mode,
+        }
     }
 }
