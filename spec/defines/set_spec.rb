@@ -28,16 +28,12 @@ describe 'sslcert::set' do
       it { is_expected.to compile.with_all_deps }
 
       it { is_expected.to contain_file('sslcert-example.org.key').with('content' => 'KEYFILE') }
-
-      it { is_expected.to contain_file('sslcert-example.org.crt').with('source' => 'puppet:///files/sslcert-example.org.crt') }
     end
 
     context "adds cert by content on #{os}" do
       let(:params) { { 'ensure' => 'present', 'bundlefile' => nil, 'certfile_content' => 'CERTFILE' } }
 
       it { is_expected.to compile.with_all_deps }
-
-      it { is_expected.to contain_file('sslcert-example.org.key').with('source' => 'puppet:///files/sslcert-example.org.key') }
 
       it { is_expected.to contain_file('sslcert-example.org.crt').with('content' => 'CERTFILE') }
     end
@@ -102,8 +98,6 @@ describe 'sslcert::set' do
 
       it { is_expected.to contain_file('sslcert-example.org.key').with('source' => 'puppet:///files/sslcert-example.org.key') }
 
-      it { is_expected.not_to contain_file('sslcert-example.org.crt') }
-
       it { is_expected.to contain_concat('sslcert-example.org-cert-and-bundle') }
 
       it { is_expected.to contain_concat__fragment('sslcert-example.org-cert').with('source' => 'puppet:///files/sslcert-example.org.crt') }
@@ -122,10 +116,6 @@ describe 'sslcert::set' do
       end
 
       it { is_expected.to compile.with_all_deps }
-
-      it { is_expected.to contain_file('sslcert-example.org.key').with('content' => 'KEYFILE') }
-
-      it { is_expected.not_to contain_file('sslcert-example.org.crt') }
 
       it { is_expected.to contain_concat('sslcert-example.org-cert-and-bundle') }
 

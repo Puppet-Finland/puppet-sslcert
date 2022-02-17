@@ -15,8 +15,11 @@
 #   Puppet fileserver) should be 'sslcert-www.domain.com.crt' and 
 #   'sslcert-www.domain.com.key'.
 # [*bundlefile*]
-#   Full name of the bundle file, including the file extension. For example 
-#   'ca-bundle.crt'. Defaults to undef, meaning that a bundle is not installed.
+#   Full name of the bundle file, including the file extension. This determines
+#   the name of the bundlefile on target system. Also, if $bundlefile_content is
+#   not defined, it defines the name of the bundlefile on the Puppet fileserver.
+#   Example: 'ca-bundle.crt'. Defaults to undef, meaning that a bundle is not
+#   installed.
 # [*bundlefile_content*]
 #   Full content of the bundle file. If not present, the bundle is taken from
 #   puppet:///files/${bundlefile}.
@@ -41,54 +44,40 @@ define sslcert::set
     Boolean                  $embed_bundle = false
 )
 {
+
     include ::sslcert::params
 
     $basename = $title
     $keyfile = "${basename}.key"
     $certfile = "${basename}.crt"
-    $certfile_attr = {
-        'ensure' => $ensure,
-        'owner'  => $::sslcert::params::owner,
-        'group'  => $::sslcert::params::cert_group,
-        'mode'   => $::sslcert::params::cert_mode,
+
+    $bundlefile_source = $bundlefile_content ? {
+      undef   => "puppet:///files/${bundlefile}", # lint:ignore:puppet_url_without_modules
+      default => undef
+    }
+
+    $certfile_source = $certfile_content ? {
+      undef   => "puppet:///files/sslcert-${certfile}", # lint:ignore:puppet_url_without_modules
+      default => undef
+    }
+
+    $keyfile_source = $keyfile_content ? {
+      undef   => "puppet:///files/sslcert-${keyfile}", # lint:ignore:puppet_url_without_modules
+      default => undef
     }
 
     # The key will always be installed as-is
     file { "sslcert-${keyfile}":
-        ensure => $ensure,
-        name   => "${::sslcert::params::keydir}/${keyfile}",
-        owner  => $::sslcert::params::owner,
-        group  => $::sslcert::params::private_key_group,
-        mode   => $::sslcert::params::private_key_mode,
-    }
-    if $keyfile_content {
-        File["sslcert-${keyfile}"] {
-            content => $keyfile_content,
-        }
-    } else {
-        File["sslcert-${keyfile}"] {
-            source => "puppet:///files/sslcert-${keyfile}", # lint:ignore:puppet_url_without_modules
-        }
+        ensure  => $ensure,
+        name    => "${::sslcert::params::keydir}/${keyfile}",
+        content => $keyfile_content,
+        source  => $keyfile_source,
+        owner   => $::sslcert::params::owner,
+        group   => $::sslcert::params::private_key_group,
+        mode    => $::sslcert::params::private_key_mode,
     }
 
-    unless $embed_bundle {
-        file { "sslcert-${certfile}":
-            name => "${::sslcert::params::certdir}/${certfile}",
-            *    => $certfile_attr,
-        }
-        if $certfile_content {
-            File["sslcert-${certfile}"] {
-                content => $certfile_content,
-            }
-        } else {
-            File["sslcert-${certfile}"] {
-                source => "puppet:///files/sslcert-${certfile}", # lint:ignore:puppet_url_without_modules
-            }
-        }
-    }
-
-
-    # We might not need a CA bundle if the existing ones are enough, or if we're
+    # We might not need a CA bundle if the existing ones are enough, or if we're 
     # installing self-signed certificates.
     if $bundlefile {
 
@@ -98,52 +87,56 @@ define sslcert::set
             $target = "sslcert-${basename}-cert-and-bundle"
 
             concat { $target:
-                path => "${::sslcert::params::certdir}/${certfile}",
-                *    => $certfile_attr,
+                ensure => $ensure,
+                path   => "${::sslcert::params::certdir}/${certfile}",
+                owner  => $::sslcert::params::owner,
+                group  => $::sslcert::params::cert_group,
+                mode   => $::sslcert::params::cert_mode,
             }
-            if $certfile_content {
-                concat::fragment { "sslcert-${basename}-cert":
-                    content => $certfile_content,
-                    # The certificate must be placed at the head
-                    order   => '1',
-                    target  => $target,
-                }
-            } else {
-                concat::fragment { "sslcert-${basename}-cert":
-                    source => "puppet:///files/sslcert-${certfile}", # lint:ignore:puppet_url_without_modules
-                    # The certificate must be placed at the head
-                    order  => '1',
-                    target => $target,
-                }
-            }
-            if $bundlefile_content {
-                concat::fragment { "sslcert-${basename}-bundle":
-                    content => $bundlefile_content,
-                    order   => '2',
-                    target  => $target,
-                }
-            } else {
-                concat::fragment { "sslcert-${basename}-bundle":
-                    source => "puppet:///files/${bundlefile}", # lint:ignore:puppet_url_without_modules
-                    order  => '2',
-                    target => $target,
+            concat::fragment { "sslcert-${basename}-cert":
+                source  => $certfile_source,
+                content => $certfile_content,
 
-                }
+                # The certificate must be placed at the head
+                order   => '1',
+                target  => $target,
+            }
+            concat::fragment { "sslcert-${basename}-bundle":
+                source  => $bundlefile_source,
+                content => $bundlefile_content,
+                order   => '2',
+                target  => $target,
             }
         } else {
-            if $bundlefile_content {
-                file { "sslcert-${bundlefile}":
-                    name    => "${::sslcert::params::certdir}/${bundlefile}",
-                    content => $bundlefile_content,
-                    *       => $certfile_attr,
-                }
-            } else {
-                file { "sslcert-${bundlefile}":
-                    name   => "${::sslcert::params::certdir}/${bundlefile}",
-                    source => "puppet:///files/${bundlefile}", # lint:ignore:puppet_url_without_modules
-                    *      => $certfile_attr,
-                }
+            file { "sslcert-${bundlefile}":
+                ensure  => $ensure,
+                name    => "${::sslcert::params::certdir}/${bundlefile}",
+                source  => $bundlefile_source,
+                content => $bundlefile_content,
+                owner   => $::sslcert::params::owner,
+                group   => $::sslcert::params::cert_group,
+                mode    => $::sslcert::params::cert_mode,
+
             }
+            file { "sslcert-${certfile}":
+                ensure  => $ensure,
+                name    => "${::sslcert::params::certdir}/${certfile}",
+                source  => $certfile_source,
+                content => $certfile_content,
+                owner   => $::sslcert::params::owner,
+                group   => $::sslcert::params::cert_group,
+                mode    => $::sslcert::params::cert_mode,
+            }
+        }
+    } else {
+        file { "sslcert-${certfile}":
+            ensure  => $ensure,
+            name    => "${::sslcert::params::certdir}/${certfile}",
+            source  => $certfile_source,
+            content => $certfile_content,
+            owner   => $::sslcert::params::owner,
+            group   => $::sslcert::params::cert_group,
+            mode    => $::sslcert::params::cert_mode,
         }
     }
 }

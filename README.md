@@ -10,8 +10,41 @@ files have changed.
 
 # Module usage
 
-First put your certificates to the Puppet fileserver under the "files" 
-directory and name them like this:
+The ::sslcert::set define supports two sources for the the certificate, key and
+CA bundle:
+
+* Parameters (e.g. string from hiera-eyaml)
+* Puppet fileserver
+
+These can also be mixed, so you could get your cert and CA bundle from the
+Puppet fileserver, but the private key from hiera-eyaml, passing it to the
+define as a string.
+
+Using this module from another class is simple:
+
+    include ::sslcert
+    
+    sslcert::set { 'www.domain.com':
+        bundlefile   => 'ca-bundle.crt',
+        embed_bundle => false,
+    }
+
+## Passing certs as paramaters
+
+The relevant parameters in ::sslcert::set are:
+
+* bundlefile: target filename for the bundle
+* bundlefile_content: content of the bundle
+* certfile_content: content of the certificate
+* keyfile_content: content of the keyfile
+
+If any of the content parameters are set, then Puppet does not try to fetch
+that particular file from the Puppet fileserver.
+
+## Getting certs from the Puppet fileserver
+
+To use the Puppet fileserver approach put your certificates to the "files"
+share and name them like this:
 
 * sslcert-${basename}.crt
 * sslcert-${basename}.key
@@ -21,12 +54,10 @@ If you want to install a CA bundle, simply copy it to the "files" directory and
 pass the filename, including the file extension, as the $bundlefile parameter of 
 the ::sslcert::set resource. Next a few examples using Hiera.
 
-You always need to include the main class, unless you create your resources 
-using create_resource functions in site.pp:
+## Automatic resource creation in main class
 
-    include ::sslcert
-
-Install a certificate, key and a separate bundle file (e.g. for apache2).
+The main class does not do anything except support creating resources from a
+hash. To Install a certificate, key and a separate bundle file (e.g. for apache2).
 
     sslcert::sets:
         www.domain.com:
@@ -55,14 +86,4 @@ Example of usage from within a node manifest:
     
     class { '::sslcert':
         sets => $sets,
-    }
-
-Usage from another class, without having the ::sslcert main class as a 
-middleman:
-
-    include ::sslcert
-    
-    sslcert::set { 'www.domain.com':
-        bundlefile   => 'ca-bundle.crt',
-        embed_bundle => false,
     }
