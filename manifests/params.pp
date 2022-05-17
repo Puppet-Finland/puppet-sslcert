@@ -19,10 +19,7 @@ class sslcert::params {
             $owner = 'root'
             $cert_group = 'root'
             $cert_mode = '0644'
-            $private_key_group = $::lsbdistcodename ? {
-              /(focal)/ => 'root',
-              default   => 'ssl-cert',
-            }
+            $private_key_group = 'root'
             $private_key_mode = '0640'
         }
         default: {
