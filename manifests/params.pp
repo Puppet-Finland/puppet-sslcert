@@ -20,7 +20,7 @@ class sslcert::params {
             $cert_group = 'root'
             $cert_mode = '0644'
             $private_key_group = 'root'
-            $private_key_mode = '0640'
+            $private_key_mode = '0600'
         }
         default: {
             fail("Unsupported OS: ${facts['os']['family']}")
